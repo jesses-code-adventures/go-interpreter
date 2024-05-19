@@ -1,6 +1,10 @@
 package lexer
 
-import "github.com/jesses-code-adventures/go-interpreter/token"
+import (
+	"strings"
+
+	"github.com/jesses-code-adventures/go-interpreter/token"
+)
 
 func isLetter(c byte) bool {
 	return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z' || c == '_'
@@ -8,6 +12,11 @@ func isLetter(c byte) bool {
 
 func isDigit(c byte) bool {
 	return '0' <= c && c <= '9'
+}
+
+func isDoubleableSymbol(c byte) bool {
+	doubleable := "!="
+	return strings.Contains(doubleable, string(c))
 }
 
 type Lexer struct {
@@ -26,22 +35,29 @@ func NewLexer(input string) *Lexer {
 
 func (l *Lexer) NextToken() token.Token {
 	l.eatWhitespace()
-	tok := token.TokenFromChar(l.ch)
-	if tok == nil {
-		if isDigit(l.ch) {
-			ident := l.readInteger()
-			tok = token.TokenFromInteger(ident)
-			return *tok
-		} else if isLetter(l.ch) {
-			ident := l.readIdentifier()
-			tok = token.TokenFromIdentifierString(ident)
-			return *tok
-		} else {
-			tok = token.TokenFromIllegal(l.ch)
-		}
+	if isDigit(l.ch) {
+		ident := l.readInteger() // Reads all required chars, we don't call l.readChar() before returning
+		tok := token.TokenFromInteger(ident)
+		return *tok
+	} else if isLetter(l.ch) {
+		ident := l.readIdentifier() // Reads all required chars, we don't call l.readChar() before returning
+		tok := token.TokenFromIdentifierString(ident)
+		return *tok
+	} else if isDoubleableSymbol(l.ch) && l.peekChar() == '=' {
+		curr := l.ch
+		l.readChar()
+		tok := token.TokenFromDoubledSymbol(curr, l.ch)
+		l.readChar() // Call l.readChar before returning so we don't re-read the same symbol
+		return *tok
+	} else if token.IsSymbol(l.ch) {
+		tok := token.TokenFromChar(l.ch)
+		l.readChar() // Call l.readChar before returning so we don't re-read the same symbol
+		return *tok
+	} else {
+		tok := token.TokenFromIllegal(l.ch)
+		l.readChar() // Call l.readChar before returning so we don't re-read the same symbol
+		return *tok
 	}
-	l.readChar()
-	return *tok
 }
 
 func (l *Lexer) readChar() {
@@ -74,4 +90,11 @@ func (l *Lexer) eatWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
 	}
+}
+
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= l.inputLength {
+		return 0
+	}
+	return l.input[l.readPosition]
 }
