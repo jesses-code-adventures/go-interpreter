@@ -25,7 +25,7 @@ func TestSymbols(t *testing.T) {
 		{token.EOF, ""},
 	}
 
-	l := NewLexer(input)
+	l := New(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()
@@ -90,7 +90,7 @@ let result = add(five, ten);
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	l := NewLexer(input)
+	l := New(input)
 	for i, tt := range tests {
 		tok := l.NextToken()
 
@@ -206,7 +206,7 @@ if (5 < 10) {
 		{token.EOF, ""},
 	}
 
-	l := NewLexer(input)
+	l := New(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()

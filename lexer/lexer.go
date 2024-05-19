@@ -31,7 +31,7 @@ type Lexer struct {
 	ch           byte // current char value. only supports ASCII, if we want to support UTF-8/UNICODE we must use a rune.
 }
 
-func NewLexer(input string) *Lexer {
+func New(input string) *Lexer {
 	l := &Lexer{input: input, inputLength: len(input)}
 	l.readChar()
 	return l
