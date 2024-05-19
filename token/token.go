@@ -41,6 +41,8 @@ const (
 	ELSE     = "ELSE"
 	TRUE     = "TRUE"
 	FALSE    = "FALSE"
+	FOR      = "FOR"
+	BREAK    = "BREAK"
 )
 
 func IsSymbol(c byte) bool {
@@ -55,6 +57,8 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"break":  BREAK,
+	"for":    FOR,
 }
 
 func lookupIdent(ident string) TokenType {

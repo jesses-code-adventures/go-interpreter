@@ -19,6 +19,10 @@ func isDoubleableSymbol(c byte) bool {
 	return strings.Contains(doubleable, string(c))
 }
 
+func isStringDelimiter(c byte) bool {
+	return c == '"' || c == '\''
+}
+
 type Lexer struct {
 	input        string
 	inputLength  int
@@ -41,6 +45,10 @@ func (l *Lexer) NextToken() token.Token {
 		return *tok
 	} else if isLetter(l.ch) {
 		ident := l.readIdentifier() // Reads all required chars, we don't call l.readChar() before returning
+		tok := token.TokenFromIdentifierString(ident)
+		return *tok
+	} else if isStringDelimiter(l.ch) {
+		ident := l.readString() // Reads all required chars, we don't call l.readChar() before returning
 		tok := token.TokenFromIdentifierString(ident)
 		return *tok
 	} else if isDoubleableSymbol(l.ch) && l.peekChar() == '=' {
@@ -77,6 +85,17 @@ func (l *Lexer) readIdentifier() string {
 	}
 	return l.input[startPosition:l.position]
 }
+
+func (l *Lexer) readString() string {
+	startPosition := l.position
+	l.readChar()
+	for !isStringDelimiter(l.ch) {
+		l.readChar()
+	}
+	l.readChar()
+	return l.input[startPosition:l.position]
+}
+
 
 func (l *Lexer) readInteger() string {
 	startPosition := l.position
