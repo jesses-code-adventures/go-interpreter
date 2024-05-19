@@ -3,30 +3,42 @@ package token
 type TokenType string
 
 const (
-    ILLEGAL = "ILLEGAL" // Unknown token or character
-    EOF = "EOF" // End of file - lexer can stop
+	ILLEGAL = "ILLEGAL" // Unknown token or character
+	EOF     = "EOF"     // End of file - lexer can stop
 
-    // Identifiers, literals
-    IDENT = "IDENT" // User-defined identifier such as add, foobar, x, y etc
-    INT = "INT"
+	// Identifiers, literals
+	IDENT = "IDENT" // User-defined identifier such as add, foobar, x, y etc
+	INT   = "INT"
 
-    // Operators
-    ASSIGN = "="
-    PLUS = "+"
+	// Operators
+	ASSIGN = "="
+	PLUS   = "+"
 
-    // Delimiters
-    COMMA = ","
-    SEMICOLON = ";"
-    COLON = ":"
-    LPAREN = "("
-    RPAREN = ")"
-    LSQUIRLY = "{"
-    RSQUIRLY = "}"
+	// Delimiters
+	COMMA     = ","
+	SEMICOLON = ";"
+	COLON     = ":"
+	LPAREN    = "("
+	RPAREN    = ")"
+	LSQUIRLY  = "{"
+	RSQUIRLY  = "}"
 
-    // Keywords
-    FUNCTION = "FUNCTION"
-    LET = "LET"
+	// Keywords
+	FUNCTION = "FUNCTION"
+	LET      = "LET"
 )
+
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
+}
+
+func lookupIdent(ident string) TokenType {
+	if tok, ok := keywords[ident]; ok {
+		return tok
+	}
+	return IDENT
+}
 
 type Token struct {
 	Type    TokenType
@@ -34,32 +46,56 @@ type Token struct {
 }
 
 func newToken(tokenType TokenType, literal byte) Token {
-    return Token{tokenType, string(literal)}
+	return Token{tokenType, string(literal)}
 }
 
-func TokenFromChar(c byte) Token {
-    switch c {
+func TokenFromChar(c byte) *Token {
+	var tok Token
+	switch c {
 	case '=':
-	    return newToken(ASSIGN, c)
+		tok = newToken(ASSIGN, c)
+		return &tok
 	case '+':
-	    return newToken(PLUS, c)
+		tok = newToken(PLUS, c)
+		return &tok
 	case ',':
-	    return newToken(COMMA, c)
+		tok = newToken(COMMA, c)
+		return &tok
 	case ';':
-	    return newToken(SEMICOLON, c)
+		tok = newToken(SEMICOLON, c)
+		return &tok
 	case ':':
-	    return newToken(COLON, c)
+		tok = newToken(COLON, c)
+		return &tok
 	case '(':
-	    return newToken(LPAREN, c)
+		tok = newToken(LPAREN, c)
+		return &tok
 	case ')':
-	    return newToken(RPAREN, c)
+		tok = newToken(RPAREN, c)
+		return &tok
 	case '{':
-	    return newToken(LSQUIRLY, c)
+		tok = newToken(LSQUIRLY, c)
+		return &tok
 	case '}':
-	    return newToken(RSQUIRLY, c)
+		tok = newToken(RSQUIRLY, c)
+		return &tok
 	case 0:
-	    return Token{EOF, ""}
-    }
-    // TODO: Maybe this could be better
-    return Token{}
+		tok = Token{EOF, ""}
+		return &tok
+	}
+	return nil
+}
+
+func TokenFromIdentifierString(s string) *Token {
+	tokenType := lookupIdent(s)
+	return &Token{tokenType, s}
+}
+
+func TokenFromInteger(s string) *Token {
+	return &Token{INT, s}
+}
+
+func TokenFromIllegal(c byte) *Token {
+	tok := newToken(ILLEGAL, c)
+	return &tok
 }
